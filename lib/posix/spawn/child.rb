@@ -90,6 +90,7 @@ module POSIX
         @input = @options.delete(:input)
         @timeout = @options.delete(:timeout)
         @max = @options.delete(:max)
+        @truncate_output = @options.delete(:truncate_output)
         if @options.delete(:pgroup_kill)
           @pgroup_kill = true
           @options[:pgroup] = true
@@ -168,7 +169,11 @@ module POSIX
           end
           @status = waitpid(pid) rescue nil
         end
-        raise
+        if @truncate_output && boom.is_a?(MaximumOutputExceeded)
+          return
+        else
+          raise
+        end
       ensure
         # let's be absolutely certain these are closed
         [stdin, stdout, stderr].each { |fd| fd.close rescue nil }

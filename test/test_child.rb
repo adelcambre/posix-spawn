@@ -94,6 +94,12 @@ class ChildTest < Minitest::Test
     assert_process_group_reaped Process.pid
   end
 
+  def test_max_truncate
+    child = Child.build('yes', :max => 100_000, :truncate_output => true)
+    child.exec!
+    assert child.out.size > 100_000, "Output should be over the max, but finite"
+  end
+
   def test_max_pgroup_kill
     child = Child.build('yes', :max => 100_000, :pgroup_kill => true)
     assert_raises(MaximumOutputExceeded) { child.exec! }
